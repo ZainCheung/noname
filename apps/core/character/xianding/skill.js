@@ -1294,10 +1294,11 @@ const skills = {
 		subSkill: {
 			changeHp: {
 				audio: "dcxiangchen",
-				trigger: {
-					global: "changeHpAfter",
-				},
+				trigger: { global: "changeHpAfter" },
 				filter(event, player) {
+					if (event.changedHp == 0) {
+						return false;
+					}
 					return event.player == player || player.getStorage("dcxiangchen", null) == event.player;
 				},
 				direct: true,
@@ -1327,9 +1328,7 @@ const skills = {
 				audio: "dcxiangchen",
 				forced: true,
 				locked: false,
-				trigger: {
-					player: "phaseEnd",
-				},
+				trigger: { player: "phaseEnd" },
 				async content(event, trigger, player) {
 					await player.removeAdditionalSkills("dcxiangchen");
 					await player.recover();
@@ -25469,14 +25468,17 @@ const skills = {
 			event.getParent().addCount = false;
 			player
 				.when("useCardToPlayer")
-				.filter(evt => evt.card.storage && evt.card.storage.dchuahuo)
+				.filter(evt => evt.card.storage?.dchuahuo)
 				.step(async (event, trigger, player) => {
 					if (!trigger.target.getExpansions("dcxiaoyin").length) {
 						return;
 					}
 					const targets = game.filterPlayer(current => {
-						return current.getExpansions("dcxiaoyin").length;
+						return current.getExpansions("dcxiaoyin").length && lib.filter.targetEnabled2(trigger.card, player, current);
 					});
+					if (!targets.length) {
+						return;
+					}
 					const result = await player
 						.chooseBool(`是否更改${get.translation(trigger.card)}的目标？`, `将此牌的目标改为所有有“硝引”的角色（${get.translation(targets)}）。`)
 						.set("choice", targets.map(current => get.effect(current, trigger.card, player, player)).reduce((p, c) => p + c, 0) > get.effect(trigger.target, trigger.card, player, player))
