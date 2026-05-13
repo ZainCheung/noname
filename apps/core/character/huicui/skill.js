@@ -6786,7 +6786,7 @@ const skills = {
 					for (var phase of lib.phaseName) {
 						var evtx = evt.getParent(phase);
 						if (evtx && evtx.name == phase) {
-							del += evt.num;
+							del += evt.changedHp;
 							break;
 						}
 					}
@@ -17917,7 +17917,7 @@ const skills = {
 				popup: false,
 				trigger: { player: "changeHp" },
 				filter(event, player) {
-					return event.num < 0;
+					return event.changedHp < 0;
 				},
 				async content(event, trigger, player) {
 					player.removeSkill("rexiahui_block");
@@ -18225,11 +18225,11 @@ const skills = {
 				async content(event, trigger, player) {
 					const target = trigger.player;
 					if (target.getHistory("useCard", evt => get.color(evt.card) == "black").length > 0 && player.canUse("juedou", target)) {
-						await player.useCard({ name: "juedou", isCard: true }, target, "dcxunji_effect");
+						await player.useCard({ name: "juedou", isCard: true }, target, event.name);
 					}
-					player.unmarkAuto("dcxunji_effect", [target]);
-					if (!player.storage.dcxunji_effect.length) {
-						player.removeSkill("dcxunji_effect");
+					player.unmarkAuto(event.name, [target]);
+					if (!player.getStorage(event.name).length) {
+						player.removeSkill(event.name);
 					}
 				},
 				group: "dcxunji_loseHp",
